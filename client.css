@@ -1,0 +1,159 @@
+body {
+	font-family: arial;
+	display: flex;
+	flex-direction: column;
+}
+
+#sign_on {
+	right: 30%;
+    top: 25%;
+    left: 30%;
+    bottom: 25%;
+	position: absolute;
+	margin: auto;
+	text-align: center;
+	padding-top: 50px;
+	padding-bottom: 50px;
+	background-color: paleturquoise;
+}
+
+#sign_on_welcome {
+	margin: auto;
+	text-align: center;
+	font-size: 30px;
+	margin-bottom: 30px;
+}
+
+#title {
+	margin: auto;
+	text-align: center;
+	font-weight: bold;
+	display: none;
+}
+
+#lobby {
+	display: flex;
+	flex-direction: column;
+	display: none;
+}
+
+#lobby_title{
+	margin: auto;
+	text-align: center;
+	font-size: 30px;
+}
+
+#lobby_rooms {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-left: 100px;
+	margin-right: 100px;
+	border: 1px solid black;
+}
+
+.created_rooms {
+	margin: 5px;
+	border: 1px solid black;
+}
+
+#lobby_room_name_label {
+	text-align: center;
+	margin-left: 100px;
+}
+
+#lobby_room_name {
+	text-align: center;
+	border: 1px solid black;
+}
+
+#lobby_create {
+	text-align: center;
+	border: 1px solid black;
+	margin-right: 100px;
+}
+
+#lobby_welcome {
+	margin: auto;
+	text-align: center;
+	font-size: 30px;
+}
+
+#room {
+	display: flex;
+	flex-direction: column;
+	margin: auto;
+	display: none;
+}
+
+#room_name {
+	margin: auto;
+	text-align: center;
+	font-size: 30px;
+}
+
+#room_main {
+	display: flex;
+	flex-direction: row;
+	margin: auto;
+}
+
+#room_messages {
+	display: flex;
+	flex-direction: column;
+	margin: auto;
+}
+
+#room_send_message {
+	text-align: center;
+	border: 1px solid black;
+	margin: 5px;
+}
+
+#room_back {
+	text-align: center;
+	border: 1px solid black;
+	margin: 5px;
+}
+
+#room_users {
+	display: flex;
+	flex-direction: column;
+	background-color: gainsboro;
+	width: 100px;
+	border: 1px solid black;
+	margin: 5px;
+}
+
+#room_user {
+	text-align: center;
+	height: 30px;
+}
+
+.listed_users {
+	height: 30px;
+}
+
+#room_user_list {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+}
+
+#room_owner {
+	display: none;
+}
+
+#chatlog {
+	width: 700px;
+	height: 350px;
+	border: 1px solid black;
+	margin: 5px;
+	overflow: auto;
+}
+
+#message_input {
+	margin: 5px;
+	border: 1px solid black;
+	margin: 5px;
+}

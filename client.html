@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+   	<head>
+   		<meta charset="utf-8" />
+   		<style type="text/css">
+   			body {
+				font-family: arial;
+				display: flex;
+				flex-direction: column;
+			}
+
+			#sign_on {
+				right: 30%;
+    			top: 25%;
+    			left: 30%;
+    			bottom: 25%;
+				position: absolute;
+				margin: auto;
+				text-align: center;
+				padding-top: 50px;
+				padding-bottom: 50px;
+				background-color: paleturquoise;
+			}
+			
+			#room_password {
+				right: 30%;
+    			top: 25%;
+    			left: 30%;
+    			bottom: 25%;
+				position: absolute;
+				margin: auto;
+				text-align: center;
+				padding-top: 50px;
+				padding-bottom: 25px;
+				background-color: paleturquoise;
+				display: none;
+			}
+
+			#sign_on_welcome {
+				margin: auto;
+				text-align: center;
+				font-size: 30px;
+				margin-bottom: 30px;
+			}
+
+			#title {
+				margin: auto;
+				text-align: center;
+				font-weight: bold;
+				display: none;
+			}
+
+			#lobby {
+				display: flex;
+				flex-direction: column;
+				display: none;
+			}
+
+			#lobby_title{
+				margin: auto;
+				text-align: center;
+				font-size: 30px;
+			}
+
+			#lobby_rooms {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				margin-left: 100px;
+				margin-right: 100px;
+				border: 1px solid black;
+			}
+
+			.created_rooms {
+				margin: 5px;
+				border: 1px solid black;
+			}
+
+			#lobby_room_name_label {
+				text-align: center;
+				margin-left: 100px;
+			}
+
+			#lobby_room_name {
+				text-align: center;
+				border: 1px solid black;
+			}
+
+			#lobby_create {
+				text-align: center;
+				border: 1px solid black;
+				margin-right: 100px;
+			}
+
+			#lobby_welcome {
+				margin: auto;
+				text-align: center;
+				font-size: 30px;
+			}
+
+			#room {
+				display: flex;
+				flex-direction: column;
+				margin: auto;
+				display: none;
+			}
+
+			#room_name {
+				margin: auto;
+				text-align: center;
+				font-size: 30px;
+			}
+
+			#room_main {
+				display: flex;
+				flex-direction: row;
+				margin: auto;
+			}
+
+			#room_messages {
+				display: flex;
+				flex-direction: column;
+				margin: auto;
+			}
+
+			#room_send_message {
+				text-align: center;
+				border: 1px solid black;
+				margin: 5px;
+			}
+
+			#room_back {
+				text-align: center;
+				border: 1px solid black;
+				margin: 5px;
+			}
+
+			#room_users {
+				display: flex;
+				flex-direction: column;
+				background-color: gainsboro;
+				width: 100px;
+				border: 1px solid black;
+				margin: 5px;
+			}
+
+			#room_user {
+				text-align: center;
+				height: 30px;
+			}
+
+			.listed_users {
+				height: 30px;
+			}
+
+			#room_user_list {
+				display: flex;
+				flex-direction: column;
+				text-align: center;
+			}
+
+			#room_owner {
+				display: none;
+			}
+
+			#chatlog {
+				width: 700px;
+				height: 350px;
+				border: 1px solid black;
+				margin: 5px;
+				overflow: auto;
+			}
+
+			#message_input {
+				margin: 5px;
+				border: 1px solid black;
+				margin: 5px;
+			}
+			
+			#private_back {
+				display: none;
+			}
+   		</style>
+      	<script src="/socket.io/socket.io.js"></script>
+      	<title>chat</title>
+   	</head>
+   	<body>
+   		<h1 id="title">CHAT TIME</h1>
+   		<div id="sign_on">
+   			<div id="sign_on_welcome">Welcome to chat time!</div><br />
+			<div id="sign_on_username">
+				<label>username: </label>
+        		<input type="text" id="username" />
+			</div><br />
+        	<button id="sign_on_submit" type="button">Submit</button>
+		</div>
+		<div id="lobby">
+			<div id="lobby_welcome"></div>
+			<div id="lobby_title">Rooms</div>
+			<div id="lobby_rooms"></div>
+			<label id="lobby_room_name_label">room name: </label>
+			<input type="text" id="lobby_room_name" />
+			<label id="lobby_room_password_label">room password: </label>
+			<input type="text" id="lobby_room_password" />
+			<button id="lobby_create" onclick="createRoom()">Create room</button>
+		</div>
+		<div id="room_password">
+			<label id="room_password_label">password: </label>
+			<input type="text" id="room_password_input" />
+			<button id="room_enter_password" onclick="goInRoom()">Get in</button>
+		</div>
+		<div id="room">
+			<div id="room_name"></div>
+			<div id="room_main">
+				<div id="room_users">
+					<div id="room_user">USERS</div>
+					<div id="room_user_list"></div>
+				</div>
+				<div id="room_messages">
+					<div id="chatlog"></div>
+					<textarea type="text" id="message_input" cols="100" rows="10"></textarea>
+					<button id="room_send_message" onclick="sendMessage()">send</button>
+					<button id="room_back" onclick="backToLobby()">Back to lobby</button>
+					<button id="private_back" onclick="privateBack()">Back to room</button>
+				</div>
+			</div>
+			<div id="room_owner">
+				<label id="room_kick">kick menu: </label>
+				<select id="room_kick_menu"></select>
+				<button id="room_kick_submit" onclick="kickUser()">Kick user</button>
+				<label id="room_ban">ban user name: </label>
+				<input type="text" id="room_ban_username" />
+				<button id="room_ban_submit" onclick="banUser()">Ban user</button>
+				<label id="room_unban">unban user name: </label>
+				<input type="text" id="room_unban_username" />
+				<button id="room_unban_submit" onclick="unbanUser()">Unban user</button>
+			</div>
+		</div>
+		
+		<script type ="text/javascript">      	
+		
+		var username = "";
+		var currentRoom = "";
+		var banList = new Set();
+		
+		var socketio = io.connect();
+		
+		// load all the exist rooms.
+		socketio.on("message_to_client_load",function(data) {
+      		var rooms = data['message'];
+      		var room = "";
+         	for (room in rooms) {
+         		var roomObj = document.createElement("div");
+				roomObj.appendChild(document.createTextNode(rooms[room]));
+				document.getElementById("lobby_rooms").appendChild(roomObj);
+         		roomObj.classList.add("created_rooms");
+         		roomObj.setAttribute("id", rooms[room]);
+         		roomObj.addEventListener("click", function(event) {
+         			document.getElementById("room_password_label").innerHTML = event.srcElement.id + " password: ";
+         			document.getElementById("room_password").style.display = "initial";
+         		}, false);
+         	}
+      	});
+		
+		document.addEventListener("DOMContentLoaded", function(event){
+			socketio.emit("message_to_server_load", {
+         		message:"load"
+         	});
+		}, false);
+		
+		// pair of send and receive message.
+      	socketio.on("message_to_client",function(data) {
+      		var message = data['message'];
+      		var user = data['username'];
+         	//Append an HR thematic break and the escaped HTML of the new message
+         	document.getElementById("chatlog").appendChild(document.createElement("hr"));
+         	document.getElementById("chatlog").appendChild(document.createTextNode(user + ": " + message));
+      	});
+
+      	function sendMessage(){
+         	var msg = document.getElementById("message_input").value;
+         	socketio.emit("message_to_server", {
+         		message:msg,
+         		roomname:currentRoom,
+         		username:username
+         	});
+      	}
+      	
+      	// exit room.
+      	socketio.on("message_to_client_exit_room",function(data) {
+      		var exitSuccess = data['success'];
+      		var users = data['users'];
+      		var roomOwner = data['roomOwner'];
+      		if (exitSuccess) {
+      			if (username == data['username']) {
+      				alert("You leave this room successfully.");
+      				currentRoom = "";
+      				document.getElementById("room").style.display = "none";
+      				document.getElementById("title").style.display = "initial";
+      				document.getElementById("lobby").style.display = "initial";
+      			}
+				reloadUsers(users, roomOwner);
+      		} else {
+      			if (username == data['username']) {
+      				alert("Fail to leave this room.");
+      			}
+      		}
+      	});
+      	
+      	function backToLobby() {
+      		socketio.emit("message_to_server_exit_room", {
+				roomname:currentRoom,
+				username:username
+			});
+      	}
+      	
+      	// pair of create room.
+      	socketio.on("message_to_client_create_room",function(data) {
+         	//Append an HR thematic break and the escaped HTML of the new message
+         	var roomname = data['roomname'];
+         	var roomSuccess = data['success'];
+         	var roomOwner = data['username'];
+         	
+         	if (roomSuccess) {
+         		if (username == roomOwner) {
+         			alert("You create a room successfully.");
+         		}
+         		var roomObj = document.createElement("div");
+				roomObj.appendChild(document.createTextNode(roomname));
+				document.getElementById("lobby_rooms").appendChild(roomObj);
+         		roomObj.classList.add("created_rooms");
+         		roomObj.setAttribute("id", roomname);
+         		roomObj.addEventListener("click", function(event) {
+         			document.getElementById("room_password_label").innerHTML = roomname + " password: ";
+         			document.getElementById("room_password").style.display = "initial";
+         		}, false);
+         		
+         	} else {
+         		if (username == roomOwner) {
+         			alert("Fail to create room.");
+         		}
+         	}
+      	});
+		
+		function createRoom() {
+			var roomname = document.getElementById("lobby_room_name").value;
+			var roompassword = document.getElementById("lobby_room_password").value;
+			socketio.emit("message_to_server_create_room", {
+				roomname:roomname,
+				roompassword:roompassword,
+				username:username
+			});
+		}
+		
+		// user go in a room.
+		socketio.on("message_to_client_goin_room",function(data) {
+         	//Append an HR thematic break and the escaped HTML of the new message
+         	var state = data['state'];
+         	var roomname = data['roomname'];
+         	var users = data['users'];
+         	var roomOwner = data['owner'];
+         	var u = "";
+         	if (state == 0) {
+         		if (username == data['username']) {
+         			alert("You've entered the room.");
+         		}
+         		currentRoom = roomname;
+         		document.getElementById("title").style.display = "none";
+				document.getElementById("lobby").style.display = "none";
+				document.getElementById("room").style.display = "initial";
+				document.getElementById("room_name").innerHTML = roomname;
+				if (username == roomOwner) {
+					document.getElementById("room_owner").style.display = "initial";
+				} else {
+					document.getElementById("room_owner").style.display = "none";
+				}
+				reloadUsers(users, roomOwner);
+         	} else if (state == 1) {
+         		if (username == data['username']) {
+         			alert("Fail to enter the room.");
+         		}
+         	} else if (state == 2) {
+         		if (username == data['username']) {
+         			alert("Room password is wrong.");
+         		}
+         	}
+         	document.getElementById("room_password").style.display = "none";
+      	});
+      	
+      	function reloadUsers(users, roomOwner) {
+      		var parent = document.getElementById("room_user_list");
+			while(parent.firstChild) {
+        		parent.removeChild(parent.firstChild);
+			}
+			parent = document.getElementById("room_kick_menu");
+			while(parent.firstChild) {
+        		parent.removeChild(parent.firstChild);
+			}
+			for (u in users) {
+				var count = parent.childElementCount;
+				var userObj = document.createElement("button");
+				userObj.appendChild(document.createTextNode(users[u]));
+				document.getElementById("room_user_list").appendChild(userObj);
+         		userObj.classList.add("listed_users");
+         		userObj.setAttribute("id", users[u]);
+         		userObj.addEventListener("click", function(event) {
+         			privateChat(username, event.srcElement.id);
+         		}, false);
+         		console.log(roomOwner);
+         		if (users[u] != roomOwner) {
+         			var kickObj = document.createElement("option");
+         			kickObj.appendChild(document.createTextNode(users[u]));
+         			document.getElementById("room_kick_menu").appendChild(kickObj);
+         			kickObj.classList.add("kick_users");
+         			kickObj.setAttribute("id", "kick" + users[u]);
+         		}
+			}
+      	}
+		
+		function goInRoom() {
+			var s = document.getElementById("room_password_label").innerHTML;
+			var temp = s.split(" ");
+			var roomname = temp[0];
+			var roompassword = document.getElementById("room_password_input").value;
+			var bans = Array.from(banList);
+			var isBan = false;
+			var banroom = "";
+			for (banroom in bans) {
+				if (roomname == bans[banroom]) {
+					isBan = true;
+				}
+			}
+			if (isBan) {
+				alert("You are banned by this room.");
+				document.getElementById("room_password").style.display = "none";
+			} else {
+				socketio.emit("message_to_server_goin_room", {
+					roomname:roomname,
+					roompassword:roompassword,
+					username:username
+				});
+			}
+		}
+		
+		// pair of send and receive username.
+		socketio.on("message_to_client_sign_on",function(data) {
+         	if (data['success']) {
+         		alert("You sign on successfully.");
+         		username = document.getElementById("username").value;
+         		document.getElementById("sign_on").style.display = "none";
+				document.getElementById("title").style.display = "initial";
+				document.getElementById("lobby").style.display = "initial";
+				document.getElementById("lobby_welcome").innerHTML = 'Welcome, ' + data['username'];
+         	} else {
+         		alert("this user name is been used.");
+         	}
+      	});
+		
+		document.getElementById("sign_on_submit").addEventListener("click", function(event){
+			var newuser = document.getElementById("username").value;
+			socketio.emit("message_to_server_sign_on", {message:newuser});
+		}, false);
+		
+		// kick user.
+		socketio.on("message_to_client_kick_user",function(data) {
+         	var kickuser = data['kickuser'];
+         	var roomOwner = data['username'];
+         	var users = data['users'];
+         	if (username == kickuser) {
+         		beKicked(roomOwner);
+         	}
+      	});
+		
+		function kickUser() {
+			var parent = document.getElementById("room_kick_menu");
+			var count = parent.childElementCount;
+			var kickuser = "";
+			for (var i = 0; i < count; i++) {
+				if (parent.children[i].selected == true) {
+					kickuser = parent.children[i].getAttribute("id");
+					kickuser = kickuser.substring(4);
+				}
+			}
+			socketio.emit("message_to_server_kick_user", {
+				roomname:currentRoom,
+				username:username,
+				kickuser:kickuser
+			});
+		}
+		
+		// be kicked.
+		socketio.on("message_to_client_be_kicked",function(data) {
+      		var exitSuccess = data['success'];
+      		var users = data['users'];
+      		var roomOwner = data['roomOwner'];
+      		if (exitSuccess) {
+      			if (username == data['username']) {
+      				alert("You are kicked by the room owner.");
+      				currentRoom = "";
+      				document.getElementById("room").style.display = "none";
+      				document.getElementById("title").style.display = "initial";
+      				document.getElementById("lobby").style.display = "initial";
+      			}
+				reloadUsers(users, roomOwner);
+      		} else {
+      			if (username == data['username']) {
+      				alert("Fail to be kicked.");
+      			}
+      		}
+      	});
+		
+		function beKicked(roomOwner) {
+			socketio.emit("message_to_server_be_kicked", {
+				roomname:currentRoom,
+				roomOwner:roomOwner,
+				username:username
+			});
+		}
+		
+		// ban user.
+		socketio.on("message_to_client_ban_user",function(data) {
+         	var banroom = data['roomname'];
+         	var banneduser = data['banneduser'];
+         	var user = data['username'];
+         	var state = data['state'];
+         	if (state == 0) {
+         		if (username == banneduser) {
+         			banList.add(banroom);
+         			console.log(banList);
+         		}
+         		if (username == user) {
+         			alert("Successfully ban user " + banneduser + ".");
+         		}
+         	} else if (state == 1) {
+         		if (username == user) {
+         			alert("the ban user is already in the room.");
+         		}
+         	} else if (state == 2) {
+         		if (username == user) {
+         			alert("the ban user does not exist.");
+         		}
+         	}
+      	});
+		
+		function banUser() {
+			var banneduser = document.getElementById("room_ban_username").value;
+			socketio.emit("message_to_server_ban_user", {
+				roomname:currentRoom,
+				username:username,
+				banneduser:banneduser
+			});
+		}
+		
+		// unban user.
+		socketio.on("message_to_client_unban_user",function(data) {
+         	var banroom = data['roomname'];
+         	var unbanuser = data['unbanuser'];
+         	var user = data['username'];
+         	var state = data['state'];
+         	if (state == 0) {
+         		if (username == unbanuser) {
+         			banList.delete(banroom);
+         			console.log(banList);
+         		}
+         		if (username == user) {
+         			alert("Successfully unban user " + unbanuser + ".");
+         		}
+         	} else if (state == 1) {
+         		if (username == user) {
+         			alert("the unban user does not exist.");
+         		}
+         	}
+      	});
+		
+		function unbanUser() {
+			var unbanuser = document.getElementById("room_unban_username").value;
+			socketio.emit("message_to_server_unban_user", {
+				roomname:currentRoom,
+				username:username,
+				unbanuser:unbanuser
+			});
+		}
+		
+		// private chat.
+		socketio.on("message_to_client_private_chat",function(data) {
+         	var roomname = data['roomname'];
+         	var fromUser = data['fromUser'];
+         	var toUser = data['toUser'];
+         	var state = data['state'];
+         	if (state == 0) {
+         		if (username == toUser) {
+         			alert(fromUser + " want to talk to you privately.");
+         			document.getElementById("room_back").style.display = "none";
+         			document.getElementById("private_back").style.display = "initial";
+         			document.getElementById("room_name").innerHTML = fromUser;
+         			joinPrivate(toUser, roomname);
+         			currentRoom = roomname;
+         		}
+         		if (username == fromUser) {
+         			alert("Successfully created a private room.");
+         			document.getElementById("room_back").style.display = "none";
+         			document.getElementById("private_back").style.display = "initial";
+         			document.getElementById("room_name").innerHTML = toUser;
+         			currentRoom = roomname;
+         		}
+         	} else if (state == 1) {
+         		alert("Fail to create private room.");
+         	}
+      	});
+		
+		function privateChat(fromUser, toUser) {
+			var roomname = fromUser +"_" + toUser;
+			console.log(roomname);
+			socketio.emit("message_to_server_private_chat", {
+				oldroom:currentRoom,
+				roomname:roomname,
+				fromUser:fromUser,
+				toUser:toUser
+			});
+		}
+		
+		// join private room.
+		socketio.on("message_to_client_private_chat",function(data) {
+         	var roomname = data['roomname'];
+         	currentRoom = roomname;
+      	});
+		
+		function joinPrivate(toUser, roomname) {
+      		socketio.emit("message_to_server_join_private", {
+      			oldroom:currentRoom,
+				roomname:roomname,
+				username:toUser
+			});
+      	}
+		
+		// back to room.
+		socketio.on("message_to_client_private_back",function(data) {
+         	var roomname = data['roomname'];
+         	var fromUser = data['fromUser'];
+         	var toUser = data['toUser'];
+         	alert("Back to room.");
+         	if (username == toUser) {
+         		document.getElementById("room_back").style.display = "initial";
+         		document.getElementById("private_back").style.display = "none";
+         		document.getElementById("room_name").innerHTML = roomname;
+         		backRoom(toUser, roomname);
+         		currentRoom = roomname;
+         	}
+         	if (username == fromUser) {
+         		document.getElementById("room_back").style.display = "initial";
+         		document.getElementById("private_back").style.display = "none";
+         		document.getElementById("room_name").innerHTML = roomname;
+         		currentRoom = roomname;
+         	}
+      	});
+		
+		function privateBack() {
+			var temp = currentRoom.split("_");
+			var fromUser = temp[0];
+			var toUser = temp[1];
+			socketio.emit("message_to_server_private_back", {
+      			oldroom:currentRoom,
+      			fromUser:fromUser,
+				toUser:toUser
+			});
+		}
+		
+		// toUser back to room.
+		socketio.on("message_to_client_back_room",function(data) {
+         	var roomname = data['roomname'];
+         	currentRoom = roomname;
+      	});
+		
+		function backRoom(toUser, roomname) {
+      		socketio.emit("message_to_server_back_room", {
+      			oldroom:currentRoom,
+				roomname:roomname,
+				username:toUser
+			});
+    	}
+		
+      	</script>
+   	</body>
+</html>
